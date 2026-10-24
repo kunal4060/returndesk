@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+ * Ledger & Thread — design tokens (research report 05, Part 2).
+ * Warm paper light theme. Flat surfaces, hairline rules, no gradients,
+ * no glassmorphism. Status is never carried by colour alone.
+ */
+@theme {
+  --color-paper: #faf7f2;
+  --color-surface: #ffffff;
+  --color-ink: #1c1917;
+  --color-ink-2: #57534e;
+  --color-rule: #e7e0d4;
+  --color-accent: #9a6b1f;
+  --color-ok: #2f7d4f;
+  --color-wait: #8a6d1f;
+  --color-stuck: #b3372f;
+  --color-voucher: #5b6b8c;
+  --color-wallet: #3e7a6b;
+  --color-card: #715c1f;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
+
+html {
+  background: var(--color-paper);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Money and figures always scan in columns. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 11px letter-spaced section eyebrows, per the design language. */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+
+/* One soft, short, warm shadow — topmost layers only (drawers/modals). */
+.layer-shadow {
+  box-shadow: 0 8px 28px rgba(28, 25, 23, 0.14);
+}
+
+::selection {
+  background: #e9dfc8;
+}

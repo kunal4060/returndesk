@@ -1,0 +1,501 @@
+{
+  "id": "HERO-1",
+  "labelling": "SIMULATED — all states, timestamps, people, sellers and amounts in this file are seeded demo data. No real payment, courier or provider system is connected.",
+  "title": "Hero scenario: 4 items, 3 sellers, split payment, two returns, a pickup fight, an inspection dispute and a three-source status mismatch",
+  "order": {
+    "id": "HERO-1",
+    "placedAt": "2026-10-18T11:24:00+05:30",
+    "deliveredAt": "2026-10-20T16:40:00+05:30",
+    "currency": "INR",
+    "listTotalPaise": 225000,
+    "couponCode": "SAVE250",
+    "couponPaise": 25000,
+    "payablePaise": 200000,
+    "shippingPaise": 0,
+    "shippingNote": "Free shipping: payable 200000 paise is above the 99900 paise (₹999) free-shipping threshold at checkout. After both returns the kept items total 66667 paise, below the threshold — the threshold effect is previewed as a policy line before return confirmation (conflict C-05); this demo applies the goodwill policy and does not claw the shipping benefit back from the refunds.",
+    "payments": [
+      {
+        "instrument": "card",
+        "amountPaise": 120000,
+        "note": "Normal-speed card refund budget: 5-7 working days."
+      },
+      {
+        "instrument": "wallet",
+        "amountPaise": 50000,
+        "note": "Wallet refund budget: ~2 hours after approval."
+      },
+      {
+        "instrument": "voucher",
+        "amountPaise": 30000,
+        "note": "Voucher money refunds as a voucher, never to bank."
+      }
+    ]
+  },
+  "customer": {
+    "id": "CUST-1042",
+    "name": "A. Sharma",
+    "city": "Amaravati",
+    "accountAgeDays": 640,
+    "returnsLast90Days": 12,
+    "returnsNote": "This is the seeded heavy returner of conflict C-12: 12 returns in 90 days, all sizing/fit on apparel and footwear, all legitimate. The fraud ladder may add friction up to level 2 and must not escalate beyond it; an appeal is on file and a human reviewer overturned the escalation (see heavy-returners.json HR-1)."
+  },
+  "items": [
+    {
+      "id": "ITEM-1",
+      "name": "Velocity Street Running Shoes",
+      "sellerId": "S-01",
+      "sellerName": "SportKart",
+      "listPricePaise": 100000,
+      "couponSharePaise": 11111,
+      "effectivePricePaise": 88889
+    },
+    {
+      "id": "ITEM-2",
+      "name": "Essential Cotton Crew T-Shirt",
+      "sellerId": "S-02",
+      "sellerName": "UrbanThread Apparel",
+      "listPricePaise": 50000,
+      "couponSharePaise": 5556,
+      "effectivePricePaise": 44444
+    },
+    {
+      "id": "ITEM-3",
+      "name": "Slim-Fit Stretch Jeans",
+      "sellerId": "S-02",
+      "sellerName": "UrbanThread Apparel",
+      "listPricePaise": 45000,
+      "couponSharePaise": 5000,
+      "effectivePricePaise": 40000
+    },
+    {
+      "id": "ITEM-4",
+      "name": "AirBeat Wireless Earbuds",
+      "sellerId": "S-03",
+      "sellerName": "SoundWave Electronics",
+      "listPricePaise": 30000,
+      "couponSharePaise": 3333,
+      "effectivePricePaise": 26667
+    }
+  ],
+  "allocationMatrix": {
+    "method": "pro-rata: coupon allocated by list-price share (largest remainder); each item effective price split across instruments by payment shares 60/25/15 (largest remainder per row); rows and columns verified to sum exactly",
+    "payments": [
+      {
+        "instrument": "card",
+        "amountPaise": 120000
+      },
+      {
+        "instrument": "wallet",
+        "amountPaise": 50000
+      },
+      {
+        "instrument": "voucher",
+        "amountPaise": 30000
+      }
+    ],
+    "rows": [
+      {
+        "itemId": "ITEM-1",
+        "effectivePricePaise": 88889,
+        "legs": {
+          "card": 53334,
+          "wallet": 22222,
+          "voucher": 13333
+        },
+        "rowTotalPaise": 88889
+      },
+      {
+        "itemId": "ITEM-2",
+        "effectivePricePaise": 44444,
+        "legs": {
+          "card": 26666,
+          "wallet": 11111,
+          "voucher": 6667
+        },
+        "rowTotalPaise": 44444
+      },
+      {
+        "itemId": "ITEM-3",
+        "effectivePricePaise": 40000,
+        "legs": {
+          "card": 24000,
+          "wallet": 10000,
+          "voucher": 6000
+        },
+        "rowTotalPaise": 40000
+      },
+      {
+        "itemId": "ITEM-4",
+        "effectivePricePaise": 26667,
+        "legs": {
+          "card": 16000,
+          "wallet": 6667,
+          "voucher": 4000
+        },
+        "rowTotalPaise": 26667
+      }
+    ],
+    "columnTotalsPaise": {
+      "card": 120000,
+      "wallet": 50000,
+      "voucher": 30000
+    },
+    "grandTotalPaise": 200000
+  },
+  "returns": [
+    {
+      "id": "R-1",
+      "itemId": "ITEM-1",
+      "itemName": "Velocity Street Running Shoes",
+      "refundIntentId": "RI-R1-0001",
+      "idempotencyNote": "One stable refund-intent id for this return. Retries, double-taps and duplicate webhooks reuse RI-R1-0001 and can never mint a second refund (conflicts C-02, C-03).",
+      "reason": "Size did not fit (customer-choice return)",
+      "journeyState": "inspection_dispute_open",
+      "pickupAttempts": [
+        {
+          "attempt": 1,
+          "scheduledAt": "2026-10-23T10:00:00+05:30",
+          "outcome": "failed",
+          "courierReasonCode": "customer_unreachable",
+          "evidenceBundle": {
+            "reasonCode": "customer_unreachable",
+            "hasTimestamp": true,
+            "hasGps": true,
+            "hasCallLog": true,
+            "hasDoorstepPhoto": false
+          },
+          "bundleCompleteness": "thin — timestamp, GPS and call log present, but no doorstep photo; the courier claim is automatically downgraded and cannot be taken at face value (conflict C-07)"
+        },
+        {
+          "attempt": 2,
+          "scheduledAt": "2026-10-23T17:30:00+05:30",
+          "outcome": "failed",
+          "courierReasonCode": "customer_unreachable",
+          "evidenceBundle": {
+            "reasonCode": "customer_unreachable",
+            "hasTimestamp": true,
+            "hasGps": true,
+            "hasCallLog": true,
+            "hasDoorstepPhoto": true
+          },
+          "bundleCompleteness": "full — timestamp, GPS, call log and doorstep photo all present (conflict C-07)"
+        }
+      ],
+      "customerClaim": "I was home both times",
+      "claimState": "conflicting-claims",
+      "claimNote": "Courier evidence bundles and the customer claim disagree. Neither side is auto-believed: the case sits in the conflicting-claims state, a reschedule plus a drop-off fallback were offered, and the third attempt succeeded.",
+      "handover": {
+        "attempt": 3,
+        "handedOverAt": "2026-10-24T09:12:00+05:30",
+        "channel": "doorstep pickup (rescheduled)",
+        "doorstepQcSnapshot": {
+          "qcVerdict": "pass",
+          "frozenAt": "2026-10-24T09:12:00+05:30",
+          "sharedWithCustomerAt": "2026-10-24T09:13:00+05:30",
+          "photoIds": [
+            "EV-01",
+            "EV-03"
+          ],
+          "checklist": [
+            "Item matches order (model and colour)",
+            "No visible wear on upper or sole",
+            "Laces and insoles present",
+            "Original box and tags present",
+            "No odour or staining noted"
+          ],
+          "note": "This snapshot is frozen at handover and shared with the customer. The warehouse cannot silently overwrite it — a different warehouse verdict becomes a visible dispute (conflict C-08)."
+        }
+      },
+      "warehouseInspection": {
+        "inspectedAt": "2026-10-24T13:05:00+05:30",
+        "verdict": "used",
+        "inspectorNote": "Sole shows wear consistent with outdoor use.",
+        "conflictsWithDoorstepQc": true
+      },
+      "inspectionDispute": {
+        "id": "DSP-R1-1",
+        "status": "open",
+        "openedAt": "2026-10-24T13:20:00+05:30",
+        "basis": "Frozen doorstep QC snapshot says pass (photos EV-01, EV-03, 5-point checklist); warehouse verdict says used. Photo proof is mandatory for any deduction.",
+        "conditionTierProposed": "used — deduction up to 50% if the warehouse verdict is upheld after human review",
+        "fullRefundPaise": 88889,
+        "proposedPartialRefundPaise": 44444,
+        "proposedPartialNote": "50% of the item effective price 88889 paise, floored to 44444 paise, payable only if a human reviewer upholds the warehouse verdict with photo proof (conflict C-15). Until the dispute resolves, the legs below stay at the full matrix-row amounts and no deduction is applied silently.",
+        "slaNote": "Human review SLA 48 hours from dispute opening; the customer sees the doorstep snapshot and the warehouse photos side by side."
+      },
+      "legs": [
+        {
+          "instrument": "card",
+          "amountPaise": 53334,
+          "platformState": "processed",
+          "providerState": "reversed",
+          "sellerState": "pending",
+          "ageHours": 96,
+          "classification": "stuck",
+          "classificationReason": "Lifecycle mismatch (planted conflict C-01): the provider reports a terminal state, reversed, while the seller record still says pending. A terminal-state contradiction is stuck regardless of age; the reconciler raises a break, owns it, and customer copy must not claim the money has arrived.",
+          "sources": {
+            "platform": {
+              "state": "processed",
+              "updatedAt": "2026-10-24T08:02:00+05:30",
+              "reference": "LEDGER-RI-R1-0001-CARD"
+            },
+            "provider": {
+              "state": "reversed",
+              "updatedAt": "2026-10-24T07:41:00+05:30",
+              "reference": "ARN-764301198822 (refund later reversed by the issuing bank)"
+            },
+            "seller": {
+              "state": "pending",
+              "updatedAt": "2026-10-23T18:15:00+05:30",
+              "reference": "SELLER-S01-RET-881"
+            }
+          }
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 22222,
+          "platformState": "credited",
+          "providerState": "processed",
+          "sellerState": "credited",
+          "ageHours": 3,
+          "classification": "settled",
+          "classificationReason": "All three sources agree the wallet leg is credited. Wallet budget is ~2 hours after approval; the credit landed inside it.",
+          "sources": {
+            "platform": {
+              "state": "credited",
+              "updatedAt": "2026-10-24T06:30:00+05:30",
+              "reference": "LEDGER-RI-R1-0001-WALLET"
+            },
+            "provider": {
+              "state": "processed",
+              "updatedAt": "2026-10-24T06:29:00+05:30",
+              "reference": "WALLET-TXN-552010"
+            },
+            "seller": {
+              "state": "credited",
+              "updatedAt": "2026-10-24T06:31:00+05:30",
+              "reference": "SELLER-S01-RET-881"
+            }
+          }
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 13333,
+          "platformState": "pending",
+          "providerState": "pending",
+          "sellerState": "pending",
+          "ageHours": 1,
+          "classification": "waiting",
+          "classificationReason": "All three sources agree on pending and the leg is inside its latency budget, so this is waiting, not stuck. Planted pressure (conflict C-04): the re-issued voucher keeps the original expiry, which is close — the customer must be told the expiry date in the refund preview, not discover it later.",
+          "voucherReissue": {
+            "refundsAs": "voucher — never to bank",
+            "originalExpiry": "2026-11-02",
+            "nearExpiry": true,
+            "note": "Re-issued voucher carries the original expiry of 2026-11-02, 9 days after the refund was initiated."
+          },
+          "sources": {
+            "platform": {
+              "state": "pending",
+              "updatedAt": "2026-10-24T09:40:00+05:30",
+              "reference": "LEDGER-RI-R1-0001-VOUCHER"
+            },
+            "provider": {
+              "state": "pending",
+              "updatedAt": "2026-10-24T09:40:00+05:30",
+              "reference": "VOUCHER-REISSUE-QUEUE-311"
+            },
+            "seller": {
+              "state": "pending",
+              "updatedAt": "2026-10-24T09:41:00+05:30",
+              "reference": "SELLER-S01-RET-881"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R-2",
+      "itemId": "ITEM-2",
+      "itemName": "Essential Cotton Crew T-Shirt",
+      "refundIntentId": "RI-R2-0001",
+      "reason": "Size did not fit (customer-choice return)",
+      "journeyState": "refund_in_progress",
+      "pickupAttempts": [
+        {
+          "attempt": 1,
+          "scheduledAt": "2026-10-23T10:30:00+05:30",
+          "outcome": "handed_over",
+          "courierReasonCode": null,
+          "evidenceBundle": {
+            "reasonCode": "handover_complete",
+            "hasTimestamp": true,
+            "hasGps": true,
+            "hasCallLog": true,
+            "hasDoorstepPhoto": true
+          },
+          "bundleCompleteness": "full"
+        }
+      ],
+      "handover": {
+        "handedOverAt": "2026-10-23T10:32:00+05:30",
+        "channel": "doorstep pickup",
+        "doorstepQcSnapshot": {
+          "qcVerdict": "pass",
+          "frozenAt": "2026-10-23T10:32:00+05:30",
+          "sharedWithCustomerAt": "2026-10-23T10:33:00+05:30",
+          "photoIds": [
+            "EV-10"
+          ],
+          "checklist": [
+            "Item matches order (size and colour)",
+            "Tags attached",
+            "No stains or wear",
+            "Original packaging present"
+          ]
+        }
+      },
+      "warehouseInspection": {
+        "inspectedAt": "2026-10-23T19:05:00+05:30",
+        "verdict": "pass",
+        "conflictsWithDoorstepQc": false
+      },
+      "inspectionDispute": null,
+      "legs": [
+        {
+          "instrument": "card",
+          "amountPaise": 26666,
+          "platformState": "initiated",
+          "providerState": "pending",
+          "sellerState": "pending",
+          "ageHours": 24,
+          "classification": "waiting",
+          "classificationReason": "Card refunds run 5-7 working days at normal speed; at 24 hours this leg is well inside its budget. Split refunds arriving on different days is normal and is shown per leg."
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 11111,
+          "platformState": "processed",
+          "providerState": "pending",
+          "sellerState": "processed",
+          "ageHours": 1,
+          "classification": "waiting",
+          "classificationReason": "Inside the ~2 hour wallet budget; provider confirmation is the only outstanding step."
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 6667,
+          "platformState": "initiated",
+          "providerState": "pending",
+          "sellerState": "pending",
+          "ageHours": 1,
+          "classification": "waiting",
+          "classificationReason": "Voucher re-issue is near-instant once approved; at 1 hour the leg is inside budget. Refunds as a voucher, never to bank."
+        }
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "t": "2026-10-18T11:24:00+05:30",
+      "event": "order_placed",
+      "actor": "customer",
+      "detail": "Order HERO-1 placed: 4 items, 3 sellers, list total 225000 paise, coupon SAVE250 of 25000 paise, payable 200000 paise."
+    },
+    {
+      "t": "2026-10-18T11:24:30+05:30",
+      "event": "allocation_matrix_persisted",
+      "actor": "platform",
+      "detail": "Item x instrument allocation matrix computed at checkout (pro-rata coupon, largest remainder) and persisted. All later refunds read this matrix; nothing is re-derived."
+    },
+    {
+      "t": "2026-10-18T11:25:00+05:30",
+      "event": "payment_captured",
+      "actor": "provider",
+      "detail": "Paid card 120000 + wallet 50000 + voucher 30000 = 200000 paise."
+    },
+    {
+      "t": "2026-10-20T16:40:00+05:30",
+      "event": "order_delivered",
+      "actor": "courier",
+      "detail": "All 4 items delivered in one shipment."
+    },
+    {
+      "t": "2026-10-22T19:02:00+05:30",
+      "event": "returns_requested",
+      "actor": "customer",
+      "detail": "Returns requested for ITEM-1 (shoes) and ITEM-2 (t-shirt), both sizing. Per-item eligibility and refund previews shown before confirmation, including the free-shipping threshold policy line."
+    },
+    {
+      "t": "2026-10-22T19:03:00+05:30",
+      "event": "refund_intents_created",
+      "actor": "platform",
+      "detail": "Refund intents RI-R1-0001 and RI-R2-0001 minted once. These ids are the idempotency keys for every downstream call."
+    },
+    {
+      "t": "2026-10-23T10:00:00+05:30",
+      "event": "pickup_attempt_failed",
+      "actor": "courier",
+      "detail": "R-1 attempt 1 failed: customer_unreachable. Evidence bundle has timestamp, GPS and call log but NO doorstep photo — bundle scored thin, courier claim downgraded."
+    },
+    {
+      "t": "2026-10-23T10:32:00+05:30",
+      "event": "handover_completed",
+      "actor": "courier",
+      "detail": "R-2 handed over at the doorstep on attempt 1 with a full evidence bundle; doorstep QC snapshot frozen (pass) and shared with the customer."
+    },
+    {
+      "t": "2026-10-23T17:30:00+05:30",
+      "event": "pickup_attempt_failed",
+      "actor": "courier",
+      "detail": "R-1 attempt 2 failed: customer_unreachable, this time with a full evidence bundle including a doorstep photo."
+    },
+    {
+      "t": "2026-10-23T18:05:00+05:30",
+      "event": "conflicting_claims_opened",
+      "actor": "platform",
+      "detail": "Customer states \"I was home both times\". R-1 enters the conflicting-claims state; reschedule and a drop-off fallback are offered. Neither side is auto-believed."
+    },
+    {
+      "t": "2026-10-23T19:05:00+05:30",
+      "event": "warehouse_inspection_passed",
+      "actor": "warehouse",
+      "detail": "R-2 warehouse inspection: pass, consistent with its doorstep snapshot. Refund legs proceed on their own clocks."
+    },
+    {
+      "t": "2026-10-24T06:30:00+05:30",
+      "event": "refund_leg_credited",
+      "actor": "provider",
+      "detail": "R-1 wallet leg of 22222 paise credited — all three sources agree."
+    },
+    {
+      "t": "2026-10-24T07:41:00+05:30",
+      "event": "refund_leg_reversed_at_provider",
+      "actor": "provider",
+      "detail": "R-1 card leg reported reversed by the provider while the seller record still says pending — planted mismatch C-01. Reconciler classifies the leg stuck (terminal-state contradiction) and raises a break."
+    },
+    {
+      "t": "2026-10-24T09:12:00+05:30",
+      "event": "handover_completed",
+      "actor": "courier",
+      "detail": "R-1 handed over on the rescheduled attempt 3; doorstep QC snapshot frozen with verdict pass (photos EV-01, EV-03) and shared with the customer at 09:13."
+    },
+    {
+      "t": "2026-10-24T13:05:00+05:30",
+      "event": "warehouse_inspection_used",
+      "actor": "warehouse",
+      "detail": "R-1 warehouse inspection verdict: used — contradicting the frozen doorstep pass snapshot (conflict C-08)."
+    },
+    {
+      "t": "2026-10-24T13:20:00+05:30",
+      "event": "inspection_dispute_opened",
+      "actor": "platform",
+      "detail": "Dispute DSP-R1-1 opened. Any deduction needs human review with photo proof; the proposed ceiling is the used tier (up to 50%, conflict C-15). Legs stay at full matrix amounts until the dispute resolves."
+    },
+    {
+      "t": "2026-10-24T13:25:00+05:30",
+      "event": "demo_checkpoint",
+      "actor": "platform",
+      "detail": "Demo state: R-2 legs waiting inside their budgets; R-1 wallet settled, voucher waiting inside budget (near-expiry expiry 2026-11-02 surfaced), card leg stuck on the provider/seller mismatch; inspection dispute open. A judge pressing \"retry refund\" now hits the idempotency guard on RI-R1-0001 and no second refund is issued."
+    }
+  ]
+}

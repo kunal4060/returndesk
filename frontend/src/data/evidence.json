@@ -1,0 +1,139 @@
+{
+  "labelling": "SIMULATED evidence metadata set — metadata only, no real images. Hashes are invented but internally consistent; the reused pair EV-06 / EV-07 deliberately shares a near-identical perceptual hash.",
+  "photos": [
+    {
+      "id": "EV-01",
+      "orderId": "HERO-1",
+      "returnId": "R-1",
+      "kind": "genuine",
+      "phashHex": "d41a9c03b7e52f18",
+      "sha256Hex": "3f8a1c94e2b74d05a6c9810f4e27bd5390ac61d8e47f02b195cda83e6f40a927",
+      "exif": {
+        "dateTimeOriginal": "2026-10-24T09:11:48+05:30",
+        "deviceModel": "Nothing Phone (2a) Plus"
+      },
+      "c2paPresent": false,
+      "deliveredAt": "2026-10-20T16:40:00+05:30",
+      "notes": "Doorstep QC photo of the shoes at handover (part of the frozen QC snapshot for R-1). EXIF timestamp is after delivery and minutes before handover — fully consistent."
+    },
+    {
+      "id": "EV-02",
+      "orderId": "ORD-3310",
+      "returnId": "R-3310-1",
+      "kind": "genuine_low_light",
+      "phashHex": "6b04f2a9c815de37",
+      "sha256Hex": "b7e2095d41ac83f60d19e6a4c2f8073a95d1b6e04f38c27da51906b8e43cfa61",
+      "exif": {
+        "dateTimeOriginal": "2026-10-21T21:47:12+05:30",
+        "deviceModel": "Redmi Note 13"
+      },
+      "c2paPresent": false,
+      "deliveredAt": "2026-10-21T13:15:00+05:30",
+      "notes": "FAIRNESS TRAP: a genuine photo of a torn seam taken at night in low light. Detectors falsely flag it (precomputed aiLikelihood 0.81 in detector-scores.json). The system must route it to human review and must NOT auto-cancel the refund."
+    },
+    {
+      "id": "EV-03",
+      "orderId": "HERO-1",
+      "returnId": "R-1",
+      "kind": "genuine_whatsapp_compressed",
+      "phashHex": "92c7e15a04bd683f",
+      "sha256Hex": "e05b7d193a4c608f2e91bd37a05c84d6f12903e7ab54c91d08f6e32ba47c095d",
+      "exif": null,
+      "deliveredAt": "2026-10-20T16:40:00+05:30",
+      "notes": "Genuine handover photo forwarded through WhatsApp, which stripped the EXIF block. Absent EXIF scores ZERO on its own — honest uploads lose EXIF too. Part of the frozen doorstep QC snapshot for R-1."
+    },
+    {
+      "id": "EV-04",
+      "orderId": "ORD-3421",
+      "returnId": "R-3421-1",
+      "kind": "ai_generated",
+      "phashHex": "18de60b4f9a237c5",
+      "sha256Hex": "9a4d06c81f37be52d08a5c61e94b7302f8d15ac6907e3b42d5f01a86c39e5d24",
+      "exif": null,
+      "deliveredAt": "2026-10-19T10:05:00+05:30",
+      "notes": "Synthetic damage photo (seeded, labelled): a cracked screen render submitted as return evidence. High detector score plus a Gemini semantic-consistency flag (damage lighting inconsistent with the claimed surface) route it to human review — review only, never auto-cancel."
+    },
+    {
+      "id": "EV-05",
+      "orderId": "ORD-3477",
+      "returnId": "R-3477-1",
+      "kind": "ai_generated_recompressed",
+      "phashHex": "ab3907d1e54c8206",
+      "sha256Hex": "c41f8a05d6937e20b1a47d09c5e832f60a9d14b73e08f52c61a94d307b5e81f9",
+      "exif": null,
+      "deliveredAt": "2026-10-18T15:52:00+05:30",
+      "notes": "Synthetic photo that was screenshotted and recompressed to launder detector signals — compression drives fake-detection toward zero, which is why no single score is ever a verdict. Ensemble signals plus human review only."
+    },
+    {
+      "id": "EV-06",
+      "orderId": "ORD-4102",
+      "returnId": "R-4102-1",
+      "kind": "reused_across_orders",
+      "phashHex": "a1b2c3d4e5f60708",
+      "sha256Hex": "7d3e91a05bc648f2a90d6e13c84b57f02a691d38c47e05bda2916f84c03e7a52",
+      "exif": {
+        "dateTimeOriginal": "2026-10-10T12:03:44+05:30",
+        "deviceModel": "Samsung Galaxy M35"
+      },
+      "c2paPresent": false,
+      "deliveredAt": "2026-10-12T09:20:00+05:30",
+      "notes": "First submission of a scratched-watch photo. Its perceptual hash is the reference for the reuse pair — compare EV-07."
+    },
+    {
+      "id": "EV-07",
+      "orderId": "ORD-4559",
+      "returnId": "R-4559-1",
+      "kind": "reused_across_orders",
+      "phashHex": "a1b2c3d4e5f60709",
+      "sha256Hex": "2f6a08d4c1957e3ba04d8f61c92e5073a48b1d06e35f70ca2948d13b65e09f47",
+      "exif": {
+        "dateTimeOriginal": "2026-10-10T12:03:44+05:30",
+        "deviceModel": "Samsung Galaxy M35"
+      },
+      "c2paPresent": false,
+      "deliveredAt": "2026-10-22T11:48:00+05:30",
+      "notes": "REUSE CATCH: the same photo as EV-06 submitted on a different order (ORD-4559). phashHex differs from EV-06 in exactly 1 hex digit (near-identical), while sha256Hex differs completely because the file was re-encoded. The deterministic pHash near-duplicate search catches this; the AI score does not."
+    },
+    {
+      "id": "EV-08",
+      "orderId": "ORD-3605",
+      "returnId": "R-3605-1",
+      "kind": "c2pa_signed_ai",
+      "phashHex": "54f81cda09276be3",
+      "sha256Hex": "a08c53e71d94b602f7a31c09e85d64b20f47a13c58d90e6b42f15a37c08d69e1",
+      "exif": {
+        "dateTimeOriginal": "2026-10-20T08:14:29+05:30",
+        "deviceModel": "Synthetic render pipeline"
+      },
+      "c2paPresent": true,
+      "deliveredAt": "2026-10-19T17:26:00+05:30",
+      "notes": "The file carries a valid C2PA content credential that itself declares AI generation — the provenance signal is the strongest evidence here. Still routed to human review; the credential informs the reviewer, it does not auto-decide."
+    },
+    {
+      "id": "EV-09",
+      "orderId": "ORD-3718",
+      "returnId": "R-3718-1",
+      "kind": "predelivery_timestamp",
+      "phashHex": "c90d34e6a1f85b72",
+      "sha256Hex": "5b19e04a72d38c61f04a97d25e83b60c14f92a07d38e51b64a09d27f53c18e06",
+      "exif": {
+        "dateTimeOriginal": "2026-10-14T09:31:07+05:30",
+        "deviceModel": "OnePlus Nord CE 4"
+      },
+      "c2paPresent": false,
+      "deliveredAt": "2026-10-19T12:10:00+05:30",
+      "notes": "TIMESTAMP CATCH: the EXIF capture time (2026-10-14) predates the delivery of the order (2026-10-19) by five days — the photo cannot show this delivered item. Deterministic EXIF-vs-delivery check flags it for human review."
+    },
+    {
+      "id": "EV-10",
+      "orderId": "HERO-1",
+      "returnId": "R-2",
+      "kind": "genuine",
+      "phashHex": "7e52b018d4f39a6c",
+      "sha256Hex": "d60a47f13c85e902b6d41a07f38c25e91d04b73a56f82c19e05a63d47b80f291",
+      "exif": null,
+      "deliveredAt": "2026-10-20T16:40:00+05:30",
+      "notes": "Genuine doorstep QC photo for R-2 uploaded through the in-app camera with EXIF stripped by the app itself. Honest upload with no EXIF: must score zero on EXIF absence alone."
+    }
+  ]
+}

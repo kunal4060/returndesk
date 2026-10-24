@@ -1,0 +1,57 @@
+{
+  "labelling": "Precomputed detector scores for the seeded evidence set — simulated set, NOT live inference",
+  "model": "precomputed table (see ml/ for live model)",
+  "ensembleNote": "In the live system this detector signal sits alongside deterministic checks (pHash near-duplicate, EXIF-vs-delivery consistency, C2PA presence, exact-hash match) and a Gemini semantic-consistency signal. Every signal is review-routing only: there is no code path from any score to a cancelled or denied refund.",
+  "scores": [
+    {
+      "evidenceId": "EV-01",
+      "aiLikelihood": 0.06,
+      "confidenceNote": "Genuine doorstep photo; low score, consistent EXIF — no action."
+    },
+    {
+      "evidenceId": "EV-02",
+      "aiLikelihood": 0.81,
+      "confidenceNote": "FAIRNESS TRAP: genuine low-light photo with a HIGH score. Low light and noise are known false-positive drivers. The system still only routes to human review — the refund is not auto-cancelled and the customer is not accused."
+    },
+    {
+      "evidenceId": "EV-03",
+      "aiLikelihood": 0.22,
+      "confidenceNote": "Genuine WhatsApp-compressed photo; compression artefacts lift the score slightly. EXIF absence contributes zero. No action beyond normal processing."
+    },
+    {
+      "evidenceId": "EV-04",
+      "aiLikelihood": 0.94,
+      "confidenceNote": "Synthetic damage photo; high score corroborated by a semantic-consistency flag. Routed to the front of the human review queue."
+    },
+    {
+      "evidenceId": "EV-05",
+      "aiLikelihood": 0.57,
+      "confidenceNote": "Synthetic photo laundered through screenshot + recompression, which degrades detector reliability toward chance — the middling score is shown with this caveat, and other ensemble signals plus a human decide."
+    },
+    {
+      "evidenceId": "EV-06",
+      "aiLikelihood": 0.11,
+      "confidenceNote": "The photo itself looks genuine — because it is a real photo. The problem is reuse, caught by the pHash near-duplicate check against EV-07, not by this score."
+    },
+    {
+      "evidenceId": "EV-07",
+      "aiLikelihood": 0.13,
+      "confidenceNote": "Same reused photo as EV-06 on a different order. Low AI score, high review priority — driven by the deterministic pHash match."
+    },
+    {
+      "evidenceId": "EV-08",
+      "aiLikelihood": 0.97,
+      "confidenceNote": "Highest score, and the C2PA credential independently declares AI generation. Two agreeing signals still only route to human review."
+    },
+    {
+      "evidenceId": "EV-09",
+      "aiLikelihood": 0.09,
+      "confidenceNote": "Low AI score — the anomaly is temporal, not visual: EXIF predates delivery by five days. Caught by the deterministic timestamp check."
+    },
+    {
+      "evidenceId": "EV-10",
+      "aiLikelihood": 0.08,
+      "confidenceNote": "Genuine photo, EXIF stripped by the app itself. Low score; EXIF absence scores zero."
+    }
+  ]
+}
