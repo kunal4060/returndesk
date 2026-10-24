@@ -49,7 +49,7 @@ describe('geminiSemanticCheck — live mode (mocked fetch)', () => {
     expect(calls).toHaveLength(1);
     const call = calls[0];
     expect(call?.url).toContain(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=',
     );
     expect(call?.init?.method).toBe('POST');
     const body = JSON.parse(String(call?.init?.body)) as {

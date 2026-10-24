@@ -20,10 +20,15 @@
  *   phash_duplicate 0.90 — near-duplicate reuse, small collision chance
  *   ai_detector     0.60 — uncalibrated model / precomputed score
  *   gemini_semantic 0.60 — uncalibrated vision-LLM second opinion
+ *   finetuned_detector 0.55 — our experimental fine-tune (small local set)
  *   file_anomaly    0.40 — corroborating only
  */
 import { checkExifConsistency, type ExifMeta } from './exif.js';
 import { detectorSignal, type DetectorTable } from './detectorTable.js';
+import {
+  finetunedSignal,
+  type FinetuneResults,
+} from './finetuned.js';
 import { geminiVerdictToSignal, type GeminiVerdict } from './gemini.js';
 import { findNearDuplicates, type PHashCorpusEntry } from './phash.js';
 import {
@@ -49,6 +54,7 @@ const SIGNAL_WEIGHTS: Record<SignalKind, number> = {
   phash_duplicate: 0.9,
   ai_detector: 0.6,
   gemini_semantic: 0.6,
+  finetuned_detector: 0.55,
   file_anomaly: 0.4,
 };
 
@@ -85,6 +91,15 @@ export interface ScreenEvidenceInput {
     | RiskSignal;
   /** Optional live ONNX signal, if the caller already ran the detector. */
   onnxSignal?: RiskSignal;
+  /**
+   * Optional score from our experimental fine-tune head (P(ai), 0..1).
+   * Supply `finetunedResults` (loaded from ml/finetune/results.json) so
+   * the signal can quote its measured held-out accuracy; pass an
+   * explicit null there when the results file is missing/unparseable
+   * and the signal will carry no score instead of fabricated metrics.
+   */
+  finetunedScore?: number | null;
+  finetunedResults?: FinetuneResults | null;
 }
 
 export interface ScreenEvidenceResult {
@@ -191,6 +206,15 @@ export function screenEvidence(
 
   if (input.onnxSignal) {
     signals.push(input.onnxSignal);
+  }
+
+  if (input.finetunedScore !== undefined) {
+    signals.push(
+      finetunedSignal(
+        input.finetunedScore ?? null,
+        input.finetunedResults,
+      ),
+    );
   }
 
   if (input.geminiVerdict) {

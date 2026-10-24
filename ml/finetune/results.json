@@ -1,0 +1,39 @@
+{
+  "baseModel": "prithivMLmods/Deep-Fake-Detector-v2-Model",
+  "nTrainImages": 69,
+  "nTrainBases": 23,
+  "nTest": 11,
+  "accuracy": 0.8181818181818182,
+  "perClass": {
+    "real": {
+      "precision": 0.7142857142857143,
+      "recall": 1.0,
+      "f1": 0.8333333333333334,
+      "support": 5
+    },
+    "ai": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
+      "support": 6
+    }
+  },
+  "confusionMatrix": [
+    [
+      5,
+      0
+    ],
+    [
+      2,
+      4
+    ]
+  ],
+  "confusionMatrixLabels": [
+    "real",
+    "ai"
+  ],
+  "baseModelZeroShotAccuracy": 0.5454545454545454,
+  "splitRule": "sort base ids; bases with sorted index % 3 == 2 go to test, rest to train; split by base image, augmentations inherit the base split and are never in test",
+  "trainedAt": "2026-10-24T05:29:29.189014+00:00",
+  "runtimeSeconds": 169.46
+}

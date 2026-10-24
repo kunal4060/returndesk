@@ -5,4 +5,5 @@ export * from './provenance.js';
 export * from './detectorTable.js';
 export * from './onnxDetector.js';
 export * from './gemini.js';
+export * from './finetuned.js';
 export * from './screen.js';

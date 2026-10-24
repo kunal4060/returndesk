@@ -16,6 +16,7 @@ export type SignalKind =
   | 'c2pa_present'
   | 'exact_duplicate'
   | 'file_anomaly'
+  | 'finetuned_detector'
   | 'gemini_semantic';
 
 export type SignalBand = 'low' | 'medium' | 'high';

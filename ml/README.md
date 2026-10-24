@@ -185,3 +185,63 @@ no-auto-cancel test — worst case on **every** channel still returns
 `route_to_human_review`, `automatedDecision: null`, all actions
 `review_priority_only`, and no truthy key matching
 `/cancel|deny|reject/i` anywhere in the result.
+
+## Our fine-tune (experimental)
+
+An additional, clearly-labelled **experimental** signal — not a
+replacement for the pretrained detector above, which remains the
+primary live detector.
+
+**What it is:** transfer learning with a frozen base. The script
+`finetune/finetune.py` loads
+`prithivMLmods/Deep-Fake-Detector-v2-Model` (the PyTorch source of the
+ONNX detector used live) via `AutoImageProcessor` +
+`AutoModelForImageClassification`, freezes every parameter, extracts
+the frozen ViT embedding (last hidden state, CLS token, 768-d) for
+each image in `../../dataset/finetune/`, and trains an sklearn
+`LogisticRegression(max_iter=1000, class_weight='balanced')` head on
+the train embeddings (originals + augmentations, split by base
+image). Probabilities from the head are P(ai).
+
+**Measured numbers (real run, 2026-10-24, from
+`finetune/results.json` — not estimates):**
+
+| Metric | Value |
+|---|---|
+| Base model actually used | `prithivMLmods/Deep-Fake-Detector-v2-Model` (primary; no fallback was needed) |
+| Train images / bases | 69 images / 23 bases |
+| Test set | 11 base originals only (5 real, 6 ai) |
+| **Held-out accuracy** | **0.818 (9/11)** |
+| Real class | precision 0.714, recall 1.000 |
+| AI class | precision 1.000, recall 0.667 |
+| Confusion matrix (rows = true [real, ai]) | [[5, 0], [2, 4]] |
+| Frozen base model, zero-shot, same test set | 0.545 |
+| Runtime | 169.46 s (CPU) |
+
+Artifacts: `finetune/results.json` (metrics), `finetune/head.json`
+(head coefficients + classes `[real, ai]` + `vit-cls-768` embedding
+note), `finetune/predictions.json` (per-test-image scores),
+`finetune/run.log`.
+
+**Small-sample caveat:** the test set is n=11, so the confidence
+interval around 0.818 is wide — one image is ~9 points. This is a
+working demonstration of a fine-tuning pipeline on local data, not a
+generalisable accuracy claim.
+
+**Where it plugs in:** `src/finetuned.ts` provides
+`loadFinetuneResults(path)`, `loadFinetunePredictions(path)` and
+`finetunedSignal(score, results)` (signal kind `finetuned_detector`,
+source `our fine-tune (experimental) — logistic head on frozen
+Deep-Fake-Detector-v2 ViT embeddings`). The explanation quotes the
+measured held-out accuracy and test n read from `results.json`; if
+that file is missing or unparseable the factory returns a null-score
+signal instead of fabricating numbers. `screen.ts` accepts an optional
+`finetunedScore` input and combines it in the noisy-OR at weight
+**0.55**.
+
+**Standing rule (unchanged):** this signal, like every other signal in
+this package, can only reorder the human review queue. It can never
+auto-cancel, deny or reject a refund — `screenEvidence()` still
+returns `automatedDecision: null` and
+`outcome: 'route_to_human_review'` even with `finetunedScore: 1.0`
+(a test proves this).

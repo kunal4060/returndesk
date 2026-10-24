@@ -1,0 +1,68 @@
+[
+  {
+    "file": "ai-03.jpg",
+    "base_id": "ai-03",
+    "label": "ai",
+    "finetunedAiScore": 0.34663692688996733
+  },
+  {
+    "file": "ai-06.jpg",
+    "base_id": "ai-06",
+    "label": "ai",
+    "finetunedAiScore": 0.9998141209042617
+  },
+  {
+    "file": "ai-09.jpg",
+    "base_id": "ai-09",
+    "label": "ai",
+    "finetunedAiScore": 0.9997616615210493
+  },
+  {
+    "file": "ai-12.jpg",
+    "base_id": "ai-12",
+    "label": "ai",
+    "finetunedAiScore": 0.9993169982972058
+  },
+  {
+    "file": "ai-15.jpg",
+    "base_id": "ai-15",
+    "label": "ai",
+    "finetunedAiScore": 0.7753369683144706
+  },
+  {
+    "file": "ai-18.jpg",
+    "base_id": "ai-18",
+    "label": "ai",
+    "finetunedAiScore": 0.1660308611111668
+  },
+  {
+    "file": "real-03.jpg",
+    "base_id": "real-03",
+    "label": "real",
+    "finetunedAiScore": 0.00019083906060067237
+  },
+  {
+    "file": "real-06.jpg",
+    "base_id": "real-06",
+    "label": "real",
+    "finetunedAiScore": 0.0066641135987585524
+  },
+  {
+    "file": "real-09.jpg",
+    "base_id": "real-09",
+    "label": "real",
+    "finetunedAiScore": 0.00018273530282786362
+  },
+  {
+    "file": "real-12.jpg",
+    "base_id": "real-12",
+    "label": "real",
+    "finetunedAiScore": 0.11708093178186482
+  },
+  {
+    "file": "real-15.jpg",
+    "base_id": "real-15",
+    "label": "real",
+    "finetunedAiScore": 0.00024025422073300367
+  }
+]

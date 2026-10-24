@@ -74,6 +74,9 @@ describe('screenEvidence — NO-AUTO-CANCEL, worst case on every channel', () =>
       photoClaimedOfDeliveredItem: true,
       precomputedTable: TABLE,
       geminiVerdict,
+      // Even a maximally confident experimental fine-tune score (1.0)
+      // must not change the outcome — it only reorders the queue.
+      finetunedScore: 1.0,
     });
 
     // Every deterministic + model channel fired.
@@ -84,6 +87,11 @@ describe('screenEvidence — NO-AUTO-CANCEL, worst case on every channel', () =>
     expect(kinds).toContain('c2pa_present');
     expect(kinds).toContain('ai_detector');
     expect(kinds).toContain('gemini_semantic');
+    expect(kinds).toContain('finetuned_detector');
+    const finetuned = result.signals.find(
+      (s) => s.signal === 'finetuned_detector',
+    );
+    expect(finetuned?.score).toBe(1.0);
     expect(result.priorityScore).toBeGreaterThan(0.9);
     expect(result.band).toBe('high');
 
