@@ -35,10 +35,16 @@ describe('allocation matrix — worked example', () => {
   });
 
   it('matches the persisted matrix cell by cell', () => {
+    // Largest-remainder splits (the canonical rule — see allocation.ts):
+    // A: 66666.60 / 27777.75 / 16666.65 → residuals to wallet, then voucher.
+    // B: 53333.40 / 22222.25 / 13333.35 → residual to card.
+    // (Report 02's printed table placed these residual paise differently;
+    // its prose specifies largest-remainder, which the engine and the
+    // seeded dataset both follow so they agree to the paisa.)
     const a = getAllocationRow(matrix, 'A');
     const b = getAllocationRow(matrix, 'B');
-    expect(a.byInstrument).toEqual({ card: 66667, wallet: 27778, voucher: 16666 });
-    expect(b.byInstrument).toEqual({ card: 53333, wallet: 22222, voucher: 13334 });
+    expect(a.byInstrument).toEqual({ card: 66666, wallet: 27778, voucher: 16667 });
+    expect(b.byInstrument).toEqual({ card: 53334, wallet: 22222, voucher: 13333 });
   });
 
   it('column sums equal the payment totals exactly', () => {
@@ -53,7 +59,7 @@ describe('waterfall — worked example, returning item B', () => {
   it('pro-rata refund of B refunds B\'s matrix row exactly', () => {
     const plan = computeRefund(matrix, demoOrder, ['B'], 'prorata');
     const byInstrument = Object.fromEntries(plan.legs.map((l) => [l.instrument, l.amountPaise]));
-    expect(byInstrument).toEqual({ card: 53333, wallet: 22222, voucher: 13334 });
+    expect(byInstrument).toEqual({ card: 53334, wallet: 22222, voucher: 13333 });
     expect(plan.totalPaise).toBe(88889);
     expect(plan.grossPaise).toBe(88889);
     expect(plan.clawbackPaise).toBe(0);
@@ -88,21 +94,33 @@ describe('waterfall — worked example, returning item B', () => {
   });
 });
 
-describe('waterfall — free-shipping clawback', () => {
-  it('reverses the ₹79 benefit when kept items fall below ₹999', () => {
-    // Kept item effective ₹850 (< ₹999) after returning the ₹200 item of
-    // a ₹1,050 order that had qualified for free shipping.
-    const order: Order = {
-      id: 'CLAW-1',
-      items: [
-        { id: 'K', name: 'Kept', sellerId: 's1', listPricePaise: 85000 },
-        { id: 'R', name: 'Returned', sellerId: 's1', listPricePaise: 20000 },
-      ],
-      couponPaise: 0,
-      payments: [{ instrument: 'card', amountPaise: 105000 }],
-    };
-    const matrix = buildAllocationMatrix(order);
+describe('waterfall — free-shipping threshold policies', () => {
+  // Kept item effective ₹850 (< ₹999) after returning the ₹200 item of
+  // a ₹1,050 order that had qualified for free shipping.
+  const order: Order = {
+    id: 'CLAW-1',
+    items: [
+      { id: 'K', name: 'Kept', sellerId: 's1', listPricePaise: 85000 },
+      { id: 'R', name: 'Returned', sellerId: 's1', listPricePaise: 20000 },
+    ],
+    couponPaise: 0,
+    payments: [{ instrument: 'card', amountPaise: 105000 }],
+  };
+  const matrix = buildAllocationMatrix(order);
+
+  it('goodwill policy (the default, and the seeded dataset configuration): no deduction, legs unchanged', () => {
     const plan = computeRefund(matrix, order, ['R'], 'prorata');
+    expect(plan.shippingPolicy).toBe('goodwill');
+    expect(plan.grossPaise).toBe(20000);
+    expect(plan.clawbackPaise).toBe(0);
+    expect(plan.totalPaise).toBe(20000);
+    expect(plan.explanation.join('\n')).toContain('goodwill');
+    expect(plan.explanation.join('\n')).toContain('NOT deducted');
+  });
+
+  it('clawback policy (explicitly configured): reverses the ₹79 benefit', () => {
+    const plan = computeRefund(matrix, order, ['R'], 'prorata', { shippingPolicy: 'clawback' });
+    expect(plan.shippingPolicy).toBe('clawback');
     expect(plan.grossPaise).toBe(20000);
     expect(plan.clawbackPaise).toBe(7900);
     expect(plan.totalPaise).toBe(12100);

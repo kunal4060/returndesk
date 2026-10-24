@@ -20,9 +20,12 @@
  *    explanation says so line by line.
  *  - Free-shipping threshold: if this return drops the kept items'
  *    effective total below FREE_SHIP_THRESHOLD after the order had
- *    qualified, the waived shipping fee is reversed as an explicit
- *    policy line ("Free-shipping benefit reversed −₹79") and deducted
- *    from the refund (floored at ₹0) — previewed, never silent.
+ *    qualified, the effect is ALWAYS an explicit, explained policy
+ *    line in the preview — never silent. What the line does to the
+ *    money is the configured shipping policy: 'goodwill' (default;
+ *    the seeded dataset's configuration) deducts nothing, while
+ *    'clawback' reverses the waived fee ("Free-shipping benefit
+ *    reversed −₹79", floored at ₹0).
  */
 import { getAllocationRow, paymentTotalsByInstrument } from './allocation.js';
 import { formatINR } from './money.js';
@@ -65,16 +68,29 @@ function makeLeg(instrument: Instrument, amountPaise: number): RefundLeg {
   return leg;
 }
 
+export type ShippingPolicy = 'goodwill' | 'clawback';
+
 /**
  * Compute the refund plan for returning `itemIds` of `order`.
  * `matrix` must be the persisted allocation matrix for that order.
+ *
+ * `opts.shippingPolicy` decides what happens when a return drops the
+ * kept items below the free-shipping threshold (report 02 §2.2: the
+ * threshold effect is a policy decision, surfaced as an explicit
+ * preview line — never a silent deduction):
+ *  - 'goodwill' (DEFAULT, and the policy configured for the seeded
+ *    dataset — see dataset/data-card.md and the C-05 note): the waived
+ *    fee is NOT deducted; refund legs are the unchanged matrix rows.
+ *  - 'clawback': the waived ₹79 fee is reversed from the refund.
  */
 export function computeRefund(
   matrix: AllocationMatrix,
   order: Order,
   itemIds: readonly string[],
   mode: 'prorata' | 'priority',
+  opts?: { shippingPolicy?: ShippingPolicy },
 ): RefundPlan {
+  const shippingPolicy: ShippingPolicy = opts?.shippingPolicy ?? 'goodwill';
   if (matrix.orderId !== order.id) {
     throw new Error(`allocation matrix is for order ${matrix.orderId}, not ${order.id}`);
   }
@@ -102,13 +118,21 @@ export function computeRefund(
   }
 
   // Free-shipping threshold check (only when the benefit was granted).
+  // The effect is ALWAYS an explicit, explained preview line; whether
+  // it also reduces the refund is the configured shipping policy.
   let clawbackPaise = 0;
   const benefitWasGranted = matrix.totalEffectivePaise >= FREE_SHIP_THRESHOLD_PAISE;
   if (benefitWasGranted && keptEffectivePaise < FREE_SHIP_THRESHOLD_PAISE) {
-    clawbackPaise = Math.min(SHIPPING_FEE_PAISE, grossPaise);
-    explanation.push(
-      `Free-shipping benefit reversed −${formatINR(SHIPPING_FEE_PAISE)}: kept items total ${formatINR(keptEffectivePaise)}, below the ${formatINR(FREE_SHIP_THRESHOLD_PAISE)} free-shipping threshold, so the waived shipping fee is deducted from this refund.`,
-    );
+    if (shippingPolicy === 'clawback') {
+      clawbackPaise = Math.min(SHIPPING_FEE_PAISE, grossPaise);
+      explanation.push(
+        `Free-shipping benefit reversed −${formatINR(SHIPPING_FEE_PAISE)}: kept items total ${formatINR(keptEffectivePaise)}, below the ${formatINR(FREE_SHIP_THRESHOLD_PAISE)} free-shipping threshold, so the waived shipping fee is deducted from this refund.`,
+      );
+    } else {
+      explanation.push(
+        `Free-shipping threshold effect: kept items total ${formatINR(keptEffectivePaise)}, below the ${formatINR(FREE_SHIP_THRESHOLD_PAISE)} free-shipping threshold. Configured policy: goodwill — the waived ${formatINR(SHIPPING_FEE_PAISE)} shipping fee is NOT deducted, and the refund legs below follow the original allocation unchanged.`,
+      );
+    }
   } else if (benefitWasGranted) {
     explanation.push(
       `Free-shipping benefit stands: kept items total ${formatINR(keptEffectivePaise)}, still at or above the ${formatINR(FREE_SHIP_THRESHOLD_PAISE)} threshold — no clawback.`,
@@ -192,6 +216,7 @@ export function computeRefund(
     legs,
     grossPaise,
     clawbackPaise,
+    shippingPolicy,
     totalPaise: netPaise,
     explanation,
   };

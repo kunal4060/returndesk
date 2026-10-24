@@ -80,8 +80,10 @@ export interface RefundPlan {
   legs: RefundLeg[];
   /** Refundable value of the returned items before any clawback. */
   grossPaise: number;
-  /** Free-shipping benefit reversed by this return (0 when it stands). */
+  /** Free-shipping benefit reversed by this return (always 0 under the goodwill policy). */
   clawbackPaise: number;
+  /** Configured free-shipping threshold policy for this plan. */
+  shippingPolicy: 'goodwill' | 'clawback';
   /** grossPaise − clawbackPaise, floored at 0. Equals the sum of legs. */
   totalPaise: number;
   /** Line-by-line explanation, suitable for showing to the customer. */

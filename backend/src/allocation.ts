@@ -7,17 +7,22 @@
  *     exactly to the coupon and effective prices sum exactly to the
  *     amount actually paid.
  *  2. Each item's effective price is split across payment instruments
- *     pro-rata by the instruments' shares of the payment. The rounding
- *     scheme is *sequential rounding with the residual on the last
- *     instrument*: every instrument except the last gets
- *     round(effective × paymentShare); the last instrument takes what
- *     remains of the row, so each row sums exactly to the item's
- *     effective price. After all rows are built, a column-repair pass
- *     moves single paise between rows (one column against the last
- *     column, preserving every row sum) until each column total equals
- *     the payment total for that instrument exactly. Both invariants
- *     are asserted before the matrix is returned — a matrix that does
- *     not reconcile to the paisa is never handed out.
+ *     pro-rata by the instruments' shares of the payment, using the
+ *     same largest-remainder rule (splitByWeights): residual paise go
+ *     to the largest fractional remainders first. This is the single
+ *     canonical rounding rule for the whole engine AND the seeded
+ *     dataset (dataset/test-orders.json notes state it per order) —
+ *     report 02's prose specifies largest-remainder; its printed
+ *     worked-example table placed two residual paise differently, and
+ *     we follow the stated rule so engine and dataset agree to the
+ *     paisa on every seeded order. After all rows are built, a
+ *     column-repair pass (a safety net that is a no-op whenever
+ *     per-row largest-remainder already reconciles the columns, as it
+ *     does for every seeded order) moves single paise between rows
+ *     until each column total equals the payment total for that
+ *     instrument exactly. Both invariants are asserted before the
+ *     matrix is returned — a matrix that does not reconcile to the
+ *     paisa is never handed out.
  */
 import { splitByWeights, sumPaise } from './money.js';
 import type { AllocationMatrix, AllocationRow, Instrument, Order } from './types.js';
@@ -87,28 +92,25 @@ export function buildAllocationMatrix(order: Order): AllocationMatrix {
       ? order.items.map(() => 0)
       : splitByWeights(order.couponPaise, order.items.map((i) => i.listPricePaise));
 
-  // Step 2 — per-row instrument split: sequential rounding, residual last.
+  // Step 2 — per-row instrument split: largest remainder (splitByWeights),
+  // the same canonical rule as the coupon split and the seeded dataset.
   const rows: AllocationRow[] = order.items.map((item, idx) => {
     const couponSharePaise = couponShares[idx] ?? 0;
     const effectivePaise = item.listPricePaise - couponSharePaise;
     const byInstrument = emptyInstrumentRecord();
     if (effectiveTotal > 0 && effectivePaise > 0) {
-      let assigned = 0;
+      const parts = splitByWeights(
+        effectivePaise,
+        instrumentOrder.map((i) => paymentTotals[i] ?? 0),
+      );
       instrumentOrder.forEach((instrument, j) => {
-        if (j === instrumentOrder.length - 1) {
-          byInstrument[instrument] = effectivePaise - assigned;
-        } else {
-          const share = (effectivePaise * (paymentTotals[instrument] ?? 0)) / effectiveTotal;
-          const rounded = Math.round(share);
-          byInstrument[instrument] = rounded;
-          assigned += rounded;
-        }
+        byInstrument[instrument] = parts[j] ?? 0;
       });
     }
     return {
       itemId: item.id,
-      name: item.name,
-      sellerId: item.sellerId,
+      name: item.name ?? item.id,
+      sellerId: item.sellerId ?? '',
       listPricePaise: item.listPricePaise,
       couponSharePaise,
       effectivePaise,
