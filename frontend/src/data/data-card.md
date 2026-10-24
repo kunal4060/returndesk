@@ -90,3 +90,54 @@ budgets. A 16-entry timeline scripts the whole demo beat by beat.
 - Names are placeholders ("A. Sharma"), sellers are invented, and all hashes in
   `evidence.json` are invented values that are internally consistent only within
   this set (notably the EV-06/EV-07 reuse pair).
+
+## Fine-tune dataset (`dataset/finetune/`)
+
+A small, locally assembled labelled set built for the experimental
+fine-tune head in `app/ml/finetune/` — separate from the seeded set
+above. Full detail in `dataset/finetune/README.md`; every file's origin
+is recorded in `dataset/finetune/manifest.csv`.
+
+**Sources, with labels:**
+
+- **Real (16 base images):** genuine camera photos from the user's own
+  uploads — 13 tagged `user-camera-photo` (desk/cake, laptop-hinge
+  close-ups, an ESP32 board, flowers, a phone case, handmade frames)
+  and 3 tagged `user-camera-photo-of-monitor` (camera photos of a
+  monitor screen, tagged separately so the confound is visible).
+- **AI (18 base images):** 4 tagged `ai-generated-project` (AI-generated
+  damaged-product photos made for this project: cracked phone, damaged
+  shoes, scratched watch, torn jacket) and 14 tagged
+  `ai-generated-earlier-project` (AI-generated artwork from the user's
+  earlier projects, chosen for variety; no `.json` sidecars copied).
+
+**Counts:** 34 base images (16 real / 18 ai) → 23 train bases
+(11 real / 12 ai) and 11 test bases (5 real / 6 ai). Training files:
+69 (23 originals + 46 augmentations — per train base, a centre-crop
+80% + resize `-augcrop` and a JPEG-recompress quality-55 `-augjpg`).
+Test files: 11, originals only. Total files on disk: 80.
+
+**Split rule:** by base image, never by file — base ids sorted
+(`ai-01`…`ai-18`, `real-01`…`real-16`); bases with sorted
+`index % 3 == 2` go to test, the rest to train. Augmentations inherit
+their base's split and are never in test, so there is no leakage of a
+test photo (or a crop/recompress of it) into training.
+
+**Exclusions:** the ID-card photo `1000132180_0_b5l9.jpg` was
+explicitly excluded for privacy and never copied; no photos of people
+were included as real bases.
+
+**Measured held-out result (from `app/ml/finetune/results.json`,
+run 2026-10-24):** the logistic head on frozen
+`prithivMLmods/Deep-Fake-Detector-v2-Model` ViT embeddings scored
+**accuracy 0.818 on the 11 test originals (9/11 correct)** — real:
+precision 0.714, recall 1.000 (n=5); ai: precision 1.000, recall
+0.667 (n=6); confusion matrix (rows = true [real, ai]) [[5, 0], [2, 4]].
+The frozen base model's own zero-shot accuracy on the same test set
+was 0.545.
+
+**Small-sample caveat:** n=11 is tiny — the confidence interval around
+0.818 is **wide** (one image is ~9 percentage points), so this number
+demonstrates that the fine-tuning pipeline runs end-to-end; it is not
+evidence the head generalises to other photos, products, generators
+or compression pipelines.
