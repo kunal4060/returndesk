@@ -1,0 +1,78 @@
+{
+  "labelling": "SIMULATED fairness set — seeded profiles only, no real customer data.",
+  "frictionLadder": "L0 none · L1 extra photos requested · L2 inspection-before-refund · L3 manual review hold. The ladder escalates verification, never accusation. Legitimate profiles must never be escalated beyond their expectedMaxFrictionLevel.",
+  "profiles": [
+    {
+      "id": "HR-1",
+      "label": "Hero heavy returner (same customer as scenario HERO-1, CUST-1042)",
+      "customerId": "CUST-1042",
+      "returnsLast90Days": 12,
+      "sizingShare": 1,
+      "accountAgeDays": 640,
+      "priorDisputes": 1,
+      "expectedMaxFrictionLevel": 2,
+      "expectedAppealOutcome": "appeal_upheld — human reviewer overturns the escalation and the refund is released in full",
+      "notes": "All 12 returns are sizing/fit on apparel and footwear across multiple sizes of the same products (bracketing). This is the fairness case the metric is measured on: escalating beyond L2 is a false positive."
+    },
+    {
+      "id": "HR-2",
+      "label": "Genuinely suspicious reseller pattern",
+      "customerId": "CUST-2077",
+      "returnsLast90Days": 28,
+      "sizingShare": 0.18,
+      "accountAgeDays": 45,
+      "priorDisputes": 6,
+      "expectedMaxFrictionLevel": 3,
+      "expectedAppealOutcome": "appeal_reviewed_and_rejected — human review upholds the hold on documented resale signals (repeated high-value electronics, missing accessories, reused evidence)",
+      "notes": "Mixed categories dominated by high-value electronics, very young account, repeated disputes and resale signals. Level 3 manual review is acceptable here — but the hold is still a human decision with reasons shown, never an automated denial."
+    },
+    {
+      "id": "HR-3",
+      "label": "New account, low volume",
+      "customerId": "CUST-3015",
+      "returnsLast90Days": 2,
+      "sizingShare": 0.5,
+      "accountAgeDays": 20,
+      "priorDisputes": 0,
+      "expectedMaxFrictionLevel": 1,
+      "expectedAppealOutcome": "not_expected — friction this low should never need an appeal",
+      "notes": "New accounts get at most light verification (L1). Low volume plus zero disputes must not be punished for account age alone."
+    },
+    {
+      "id": "HR-4",
+      "label": "Long-standing customer, steady sizing returns",
+      "customerId": "CUST-1180",
+      "returnsLast90Days": 8,
+      "sizingShare": 0.88,
+      "accountAgeDays": 910,
+      "priorDisputes": 0,
+      "expectedMaxFrictionLevel": 2,
+      "expectedAppealOutcome": "appeal_upheld — if friction is applied, a human releases the refund on review",
+      "notes": "High sizing share and a clean dispute history mark this as legitimate bracketing behaviour."
+    },
+    {
+      "id": "HR-5",
+      "label": "Family account, high volume, mostly sizing",
+      "customerId": "CUST-1654",
+      "returnsLast90Days": 15,
+      "sizingShare": 0.73,
+      "accountAgeDays": 1200,
+      "priorDisputes": 2,
+      "expectedMaxFrictionLevel": 2,
+      "expectedAppealOutcome": "appeal_partially_upheld — human reviewer releases most refunds, keeps inspection-before-refund on the two disputed categories",
+      "notes": "Volume is high because several family members share one account. Prior disputes were both resolved in the customer favour, which must count for the customer, not against them."
+    },
+    {
+      "id": "HR-6",
+      "label": "Borderline: frequent returns, mixed categories",
+      "customerId": "CUST-2241",
+      "returnsLast90Days": 20,
+      "sizingShare": 0.35,
+      "accountAgeDays": 300,
+      "priorDisputes": 3,
+      "expectedMaxFrictionLevel": 3,
+      "expectedAppealOutcome": "appeal_reviewed_on_merits — human decides case by case; no pre-committed outcome",
+      "notes": "Mixed signals: volume is high and sizing share is low, but there are no resale or evidence-fraud signals. L3 manual review is acceptable; an automated denial is not."
+    }
+  ]
+}

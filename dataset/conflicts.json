@@ -1,0 +1,114 @@
+[
+  {
+    "id": "C-01",
+    "title": "Provider \"reversed\" vs seller \"pending\" on the same card leg",
+    "description": "On return R-1 the provider reports the card refund as reversed (a terminal state, with an ARN reference) while the seller record still says pending and the platform ledger says processed. Three sources, three different truths about the same money.",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "Reconciler classifies the leg STUCK as a lifecycle mismatch (terminal-state contradiction) regardless of age, raises a break with all three source records and references shown side by side, and customer copy never claims the money has arrived."
+  },
+  {
+    "id": "C-02",
+    "title": "Duplicate refund webhook delivered twice",
+    "description": "The provider delivers the same refund.processed webhook twice (at-least-once delivery), with the same provider event id.",
+    "appearsIn": "eval-only",
+    "expectedSystemBehaviour": "Webhook consumer dedupes on the provider event id (unique constraint), returns HTTP 200 on the duplicate so the provider stops retrying, and posts no second ledger entry. Exactly one refund exists."
+  },
+  {
+    "id": "C-03",
+    "title": "Retry storm: 3 refund retries on one item",
+    "description": "A judge (or an impatient customer / flaky client) fires three refund retries for the same return item after timeouts.",
+    "appearsIn": "eval-only",
+    "expectedSystemBehaviour": "All retries reuse the one stable refund-intent id minted at approval; the provider call carries it as the idempotency key and the refundable-balance ledger guard blocks any second issuance. Exactly one refund is issued; the audit trail shows all attempts collapsing onto the single intent."
+  },
+  {
+    "id": "C-04",
+    "title": "Voucher leg near expiry during a slow card leg",
+    "description": "The re-issued voucher for R-1 keeps its original expiry of 2026-11-02 — 9 days after initiation — while the card leg is still unresolved.",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "Voucher refunds as a voucher (never to bank) with its original expiry stated explicitly in the refund preview and on the leg itself, flagged near-expiry, so the customer can spend it in time. The slow card leg never delays or converts the voucher leg."
+  },
+  {
+    "id": "C-05",
+    "title": "Free-shipping threshold broken by the return (₹999 rule)",
+    "description": "The order qualified for free shipping at checkout, but after the return the kept items fall below the 99900 paise threshold (hero kept total 66667 paise; also seeded in TO-01 and TO-09).",
+    "appearsIn": "testOrders",
+    "expectedSystemBehaviour": "The threshold effect appears as an explicit, explained policy line in the return preview BEFORE confirmation — clawback or goodwill per configured policy — and is never deducted silently. In this dataset the goodwill / keep-original-allocation policy applies, so expected refund legs are the unchanged matrix rows."
+  },
+  {
+    "id": "C-06",
+    "title": "Free gift item kept while the qualifying item is returned",
+    "description": "A free gift line was granted with a qualifying purchase; the qualifying item is returned while the gift is kept (narrative seeded on TO-05).",
+    "appearsIn": "testOrders",
+    "expectedSystemBehaviour": "The preview shows the gift effect as an explicit policy line (gift must be returned, or its listed value charged, per policy) before confirmation. A gift line itself always has a 0 paise refund value and no charge is ever applied silently after the fact."
+  },
+  {
+    "id": "C-07",
+    "title": "Courier bundle with GPS but no photo vs full bundle on the next attempt",
+    "description": "R-1 pickup attempt 1 has timestamp, GPS and call log but no doorstep photo; attempt 2 has the full bundle. Both claim customer_unreachable.",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "Each attempt is scored as an evidence bundle, not an assertion. The thin bundle automatically downgrades the courier claim; combined with the customer claim it produces the conflicting-claims state, a reschedule and a drop-off fallback — never an automatic win for either side."
+  },
+  {
+    "id": "C-08",
+    "title": "Doorstep QC pass overturned by warehouse \"used\" verdict",
+    "description": "The frozen doorstep QC snapshot for R-1 says pass (photos plus 5-point checklist, shared with the customer at handover); the warehouse later records used.",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "The warehouse verdict cannot overwrite the frozen snapshot. The contradiction opens an inspection dispute (DSP-R1-1), both evidence sets are shown side by side, and any deduction requires human review with photo proof within the SLA."
+  },
+  {
+    "id": "C-09",
+    "title": "AI-generated damage photo submitted as evidence",
+    "description": "Seeded evidence entries EV-04 (ai_generated), EV-05 (ai_generated_recompressed) and EV-08 (c2pa_signed_ai) are synthetic damage photos presented as if real.",
+    "appearsIn": "evidence",
+    "expectedSystemBehaviour": "The ensemble (deterministic pHash/EXIF/C2PA checks, a pretrained detector signal and a Gemini semantic-consistency signal) routes the return to human review with the signals explained. There is NO code path from any score to a cancelled or denied refund — signals only reorder the review queue."
+  },
+  {
+    "id": "C-10",
+    "title": "Real low-light photo that detectors falsely flag (the fairness trap)",
+    "description": "EV-02 is a genuine photo taken in low light. Its precomputed detector score is deliberately high (aiLikelihood 0.81) — detectors really do flag real low-light and compressed photos at double-digit rates.",
+    "appearsIn": "evidence",
+    "expectedSystemBehaviour": "Despite the high score the refund is NOT auto-cancelled and the customer is NOT accused. The case is routed to human review, the score is displayed with its confidence note and known limits, and a human decides. This entry exists to prove the no-automated-denial rule under pressure."
+  },
+  {
+    "id": "C-11",
+    "title": "Same evidence photo reused across two different orders",
+    "description": "EV-06 and EV-07 are the same photo submitted on two different orders; their perceptual hashes are near-identical (differing in 1 hex digit).",
+    "appearsIn": "evidence",
+    "expectedSystemBehaviour": "The deterministic pHash near-duplicate search across orders catches the reuse and routes both cases to human review with the matching pair shown. The AI-likelihood score of the photo itself is low — the catch comes from the hash check, which is exactly why the ensemble is layered."
+  },
+  {
+    "id": "C-12",
+    "title": "Heavy returner: 12 sizing returns, all legitimate",
+    "description": "The hero customer (CUST-1042, profile HR-1) has 12 returns in 90 days, 100% sizing/fit, on a 640-day-old account.",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "The fraud ladder may raise friction only to level 2 (extra photos / inspection-before-refund), with every signal shown with its reason. It must not escalate beyond level 2, must not accuse, and the appeal path must reach a human who can overturn — in the seeded outcome the appeal is upheld for the customer."
+  },
+  {
+    "id": "C-13",
+    "title": "Amount mismatch of ₹1 (rounding) between platform and provider",
+    "description": "The provider report shows a refund amount differing from the platform ledger by ₹1 (100 paise), consistent with a rounding difference rather than missing money.",
+    "appearsIn": "eval-only",
+    "expectedSystemBehaviour": "Reconciler raises an amount-mismatch break, compares it against the documented paise-level rounding tolerance (never a percentage tolerance that could hide real gaps), and resolves it with a correcting ledger entry carrying a reason — never by editing the original row. Larger or unexplained differences escalate as stuck."
+  },
+  {
+    "id": "C-14",
+    "title": "Card leg exceeding its 7-working-day budget → stuck",
+    "description": "A seeded card leg remains pending beyond the normal-speed card budget of 7 working days with no terminal provider state.",
+    "appearsIn": "eval-only",
+    "expectedSystemBehaviour": "Ageing flips the leg from waiting to STUCK the moment the budget is crossed, an escalation fires to the owning team, and customer copy switches from \"on its way\" to an honest delayed message with what is being done. Before the budget crosses, the same state is correctly shown as waiting."
+  },
+  {
+    "id": "C-15",
+    "title": "Inspection partial refund at the \"used ≤50%\" tier with photo proof",
+    "description": "If the warehouse used verdict on R-1 is upheld, the refund is reduced under the published condition tiers (opened/late ≤20%, minor damage ≤25%, used ≤50%, seller fault = 100%).",
+    "appearsIn": "scenario",
+    "expectedSystemBehaviour": "The deduction is computed on the item effective price (proposed 44444 paise of 88889 paise at the 50% ceiling), shown as itemised arithmetic with the warehouse photo proof attached, decided by a human reviewer, and appealable. No deduction is ever applied from a score or a verdict alone without the proof and the preview."
+  },
+  {
+    "id": "C-16",
+    "title": "Illegal state transition attempt (credited → initiated) — must be rejected",
+    "description": "A caller (buggy client, replayed event or malicious actor) attempts to move a refund leg backwards from the terminal credited state to initiated.",
+    "appearsIn": "eval-only",
+    "expectedSystemBehaviour": "The named RefundLeg state machine rejects the transition, logs the attempt in the audit trail with actor and reason, and the leg state is unchanged. Legal transitions only — there is no collapsed free-form status field to abuse."
+  }
+]

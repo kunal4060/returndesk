@@ -1,0 +1,860 @@
+{
+  "labelling": "SIMULATED — seeded allocation-correctness orders. Expected refunds are hand-computed per the report-02 rules (pro-rata coupon by largest remainder; instrument split pro-rata by payment shares, largest remainder per row; column totals verified exactly) and are the ground truth the engine is scored against.",
+  "orders": [
+    {
+      "id": "TO-01",
+      "items": [
+        {
+          "id": "TO-01-I1",
+          "listPricePaise": 60000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 60000
+        },
+        {
+          "id": "TO-01-I2",
+          "listPricePaise": 40000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 40000
+        }
+      ],
+      "couponPaise": 0,
+      "shippingNote": "Kept items total 40000 paise, below the 99900 paise free-shipping threshold. The threshold effect is a preview policy line only; per the keep-original-allocation policy the expected refund below is the returned item matrix row with no shipping clawback.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 70000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 30000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-01-I1",
+            "effectivePricePaise": 60000,
+            "legs": {
+              "card": 42000,
+              "wallet": 18000
+            },
+            "rowTotalPaise": 60000
+          },
+          {
+            "itemId": "TO-01-I2",
+            "effectivePricePaise": 40000,
+            "legs": {
+              "card": 28000,
+              "wallet": 12000
+            },
+            "rowTotalPaise": 40000
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 70000,
+          "wallet": 30000
+        },
+        "grandTotalPaise": 100000
+      },
+      "returnItemIds": [
+        "TO-01-I1"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 42000
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 18000
+          }
+        ],
+        "totalPaise": 60000
+      }
+    },
+    {
+      "id": "TO-02",
+      "items": [
+        {
+          "id": "TO-02-I1",
+          "listPricePaise": 75000,
+          "couponSharePaise": 7500,
+          "effectivePricePaise": 67500
+        },
+        {
+          "id": "TO-02-I2",
+          "listPricePaise": 25000,
+          "couponSharePaise": 2500,
+          "effectivePricePaise": 22500
+        }
+      ],
+      "couponPaise": 10000,
+      "note": "Card-only order with a coupon: the whole refund returns on the card leg.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 90000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-02-I1",
+            "effectivePricePaise": 67500,
+            "legs": {
+              "card": 67500
+            },
+            "rowTotalPaise": 67500
+          },
+          {
+            "itemId": "TO-02-I2",
+            "effectivePricePaise": 22500,
+            "legs": {
+              "card": 22500
+            },
+            "rowTotalPaise": 22500
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 90000
+        },
+        "grandTotalPaise": 90000
+      },
+      "returnItemIds": [
+        "TO-02-I2"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 22500
+          }
+        ],
+        "totalPaise": 22500
+      }
+    },
+    {
+      "id": "TO-03",
+      "items": [
+        {
+          "id": "TO-03-I1",
+          "listPricePaise": 80000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 80000
+        },
+        {
+          "id": "TO-03-I2",
+          "listPricePaise": 20000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 20000
+        }
+      ],
+      "couponPaise": 0,
+      "note": "Wallet + voucher only, no card. The voucher share refunds as a voucher, never to bank.",
+      "payments": [
+        {
+          "instrument": "wallet",
+          "amountPaise": 60000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 40000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-03-I1",
+            "effectivePricePaise": 80000,
+            "legs": {
+              "wallet": 48000,
+              "voucher": 32000
+            },
+            "rowTotalPaise": 80000
+          },
+          {
+            "itemId": "TO-03-I2",
+            "effectivePricePaise": 20000,
+            "legs": {
+              "wallet": 12000,
+              "voucher": 8000
+            },
+            "rowTotalPaise": 20000
+          }
+        ],
+        "columnTotalsPaise": {
+          "wallet": 60000,
+          "voucher": 40000
+        },
+        "grandTotalPaise": 100000
+      },
+      "returnItemIds": [
+        "TO-03-I1"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "wallet",
+            "amountPaise": 48000
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 32000
+          }
+        ],
+        "totalPaise": 80000
+      }
+    },
+    {
+      "id": "TO-04",
+      "items": [
+        {
+          "id": "TO-04-I1",
+          "listPricePaise": 50000,
+          "couponSharePaise": 5000,
+          "effectivePricePaise": 45000
+        },
+        {
+          "id": "TO-04-I2",
+          "listPricePaise": 30000,
+          "couponSharePaise": 3000,
+          "effectivePricePaise": 27000
+        },
+        {
+          "id": "TO-04-I3",
+          "listPricePaise": 20000,
+          "couponSharePaise": 2000,
+          "effectivePricePaise": 18000
+        }
+      ],
+      "couponPaise": 10000,
+      "note": "Two of three items returned: expected legs are the sum of the two returned matrix rows.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 45000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 27000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 18000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-04-I1",
+            "effectivePricePaise": 45000,
+            "legs": {
+              "card": 22500,
+              "wallet": 13500,
+              "voucher": 9000
+            },
+            "rowTotalPaise": 45000
+          },
+          {
+            "itemId": "TO-04-I2",
+            "effectivePricePaise": 27000,
+            "legs": {
+              "card": 13500,
+              "wallet": 8100,
+              "voucher": 5400
+            },
+            "rowTotalPaise": 27000
+          },
+          {
+            "itemId": "TO-04-I3",
+            "effectivePricePaise": 18000,
+            "legs": {
+              "card": 9000,
+              "wallet": 5400,
+              "voucher": 3600
+            },
+            "rowTotalPaise": 18000
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 45000,
+          "wallet": 27000,
+          "voucher": 18000
+        },
+        "grandTotalPaise": 90000
+      },
+      "returnItemIds": [
+        "TO-04-I1",
+        "TO-04-I3"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 31500
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 18900
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 12600
+          }
+        ],
+        "totalPaise": 63000
+      }
+    },
+    {
+      "id": "TO-05",
+      "items": [
+        {
+          "id": "TO-05-I1",
+          "listPricePaise": 40000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 40000
+        },
+        {
+          "id": "TO-05-I2",
+          "listPricePaise": 30000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 30000
+        },
+        {
+          "id": "TO-05-I3",
+          "listPricePaise": 20000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 20000
+        },
+        {
+          "id": "TO-05-I4",
+          "listPricePaise": 10000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 10000
+        }
+      ],
+      "couponPaise": 0,
+      "note": "Free-gift case (conflict C-06): TO-05-I4 was a free gift line in the original cart narrative and is NOT returned; a gift has a 0 paise refund expectation only when it is itself the returned line — here it is kept, so it contributes nothing to the expected refund and no gift charge is applied in this order.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 50000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 30000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 20000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-05-I1",
+            "effectivePricePaise": 40000,
+            "legs": {
+              "card": 20000,
+              "wallet": 12000,
+              "voucher": 8000
+            },
+            "rowTotalPaise": 40000
+          },
+          {
+            "itemId": "TO-05-I2",
+            "effectivePricePaise": 30000,
+            "legs": {
+              "card": 15000,
+              "wallet": 9000,
+              "voucher": 6000
+            },
+            "rowTotalPaise": 30000
+          },
+          {
+            "itemId": "TO-05-I3",
+            "effectivePricePaise": 20000,
+            "legs": {
+              "card": 10000,
+              "wallet": 6000,
+              "voucher": 4000
+            },
+            "rowTotalPaise": 20000
+          },
+          {
+            "itemId": "TO-05-I4",
+            "effectivePricePaise": 10000,
+            "legs": {
+              "card": 5000,
+              "wallet": 3000,
+              "voucher": 2000
+            },
+            "rowTotalPaise": 10000
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 50000,
+          "wallet": 30000,
+          "voucher": 20000
+        },
+        "grandTotalPaise": 100000
+      },
+      "returnItemIds": [
+        "TO-05-I2"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 15000
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 9000
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 6000
+          }
+        ],
+        "totalPaise": 30000
+      }
+    },
+    {
+      "id": "TO-06",
+      "items": [
+        {
+          "id": "TO-06-I1",
+          "listPricePaise": 88889,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 88889
+        },
+        {
+          "id": "TO-06-I2",
+          "listPricePaise": 111111,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 111111
+        }
+      ],
+      "couponPaise": 0,
+      "note": "Instrument rounding case: effective 88889 paise splits 60/25/15 as 53333.40 / 22222.25 / 13333.35 — largest remainder gives the single residual paise to the card leg (largest fraction 0.40), giving 53334 / 22222 / 13333. Column totals still land exactly on 120000 / 50000 / 30000.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 120000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 50000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 30000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-06-I1",
+            "effectivePricePaise": 88889,
+            "legs": {
+              "card": 53334,
+              "wallet": 22222,
+              "voucher": 13333
+            },
+            "rowTotalPaise": 88889
+          },
+          {
+            "itemId": "TO-06-I2",
+            "effectivePricePaise": 111111,
+            "legs": {
+              "card": 66666,
+              "wallet": 27778,
+              "voucher": 16667
+            },
+            "rowTotalPaise": 111111
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 120000,
+          "wallet": 50000,
+          "voucher": 30000
+        },
+        "grandTotalPaise": 200000
+      },
+      "returnItemIds": [
+        "TO-06-I1"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 53334
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 22222
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 13333
+          }
+        ],
+        "totalPaise": 88889
+      }
+    },
+    {
+      "id": "TO-07",
+      "items": [
+        {
+          "id": "TO-07-I1",
+          "listPricePaise": 33333,
+          "couponSharePaise": 3333,
+          "effectivePricePaise": 30000
+        },
+        {
+          "id": "TO-07-I2",
+          "listPricePaise": 66667,
+          "couponSharePaise": 6667,
+          "effectivePricePaise": 60000
+        }
+      ],
+      "couponPaise": 10000,
+      "note": "Coupon rounding case: coupon 10000 paise splits by list share as 3333.30 / 6666.70 — largest remainder gives the residual paise to item 2 (fraction 0.70), so coupon shares are 3333 / 6667 and item 1 effective price is exactly 30000 paise.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 90000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-07-I1",
+            "effectivePricePaise": 30000,
+            "legs": {
+              "card": 30000
+            },
+            "rowTotalPaise": 30000
+          },
+          {
+            "itemId": "TO-07-I2",
+            "effectivePricePaise": 60000,
+            "legs": {
+              "card": 60000
+            },
+            "rowTotalPaise": 60000
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 90000
+        },
+        "grandTotalPaise": 90000
+      },
+      "returnItemIds": [
+        "TO-07-I1"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 30000
+          }
+        ],
+        "totalPaise": 30000
+      }
+    },
+    {
+      "id": "TO-08",
+      "items": [
+        {
+          "id": "TO-08-I1",
+          "listPricePaise": 60000,
+          "couponSharePaise": 3000,
+          "effectivePricePaise": 57000
+        },
+        {
+          "id": "TO-08-I2",
+          "listPricePaise": 24000,
+          "couponSharePaise": 1200,
+          "effectivePricePaise": 22800
+        },
+        {
+          "id": "TO-08-I3",
+          "listPricePaise": 16000,
+          "couponSharePaise": 800,
+          "effectivePricePaise": 15200
+        }
+      ],
+      "couponPaise": 5000,
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 57000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 23750
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 14250
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-08-I1",
+            "effectivePricePaise": 57000,
+            "legs": {
+              "card": 34200,
+              "wallet": 14250,
+              "voucher": 8550
+            },
+            "rowTotalPaise": 57000
+          },
+          {
+            "itemId": "TO-08-I2",
+            "effectivePricePaise": 22800,
+            "legs": {
+              "card": 13680,
+              "wallet": 5700,
+              "voucher": 3420
+            },
+            "rowTotalPaise": 22800
+          },
+          {
+            "itemId": "TO-08-I3",
+            "effectivePricePaise": 15200,
+            "legs": {
+              "card": 9120,
+              "wallet": 3800,
+              "voucher": 2280
+            },
+            "rowTotalPaise": 15200
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 57000,
+          "wallet": 23750,
+          "voucher": 14250
+        },
+        "grandTotalPaise": 95000
+      },
+      "returnItemIds": [
+        "TO-08-I2"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 13680
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 5700
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 3420
+          }
+        ],
+        "totalPaise": 22800
+      }
+    },
+    {
+      "id": "TO-09",
+      "items": [
+        {
+          "id": "TO-09-I1",
+          "listPricePaise": 45000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 45000
+        },
+        {
+          "id": "TO-09-I2",
+          "listPricePaise": 45000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 45000
+        },
+        {
+          "id": "TO-09-I3",
+          "listPricePaise": 10000,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 10000
+        }
+      ],
+      "couponPaise": 0,
+      "shippingNote": "Free-shipping threshold case (conflict C-05): kept item totals 45000 paise, below the 99900 paise threshold. Expected legs below follow the keep-original-allocation policy (no clawback); a clawback-policy deployment would show a separate explicit shipping-benefit line in the preview instead of changing these legs silently.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 40000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 40000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 20000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-09-I1",
+            "effectivePricePaise": 45000,
+            "legs": {
+              "card": 18000,
+              "wallet": 18000,
+              "voucher": 9000
+            },
+            "rowTotalPaise": 45000
+          },
+          {
+            "itemId": "TO-09-I2",
+            "effectivePricePaise": 45000,
+            "legs": {
+              "card": 18000,
+              "wallet": 18000,
+              "voucher": 9000
+            },
+            "rowTotalPaise": 45000
+          },
+          {
+            "itemId": "TO-09-I3",
+            "effectivePricePaise": 10000,
+            "legs": {
+              "card": 4000,
+              "wallet": 4000,
+              "voucher": 2000
+            },
+            "rowTotalPaise": 10000
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 40000,
+          "wallet": 40000,
+          "voucher": 20000
+        },
+        "grandTotalPaise": 100000
+      },
+      "returnItemIds": [
+        "TO-09-I1",
+        "TO-09-I3"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 22000
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 22000
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 11000
+          }
+        ],
+        "totalPaise": 55000
+      }
+    },
+    {
+      "id": "TO-10",
+      "items": [
+        {
+          "id": "TO-10-I1",
+          "listPricePaise": 10001,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 10001
+        },
+        {
+          "id": "TO-10-I2",
+          "listPricePaise": 89999,
+          "couponSharePaise": 0,
+          "effectivePricePaise": 89999
+        }
+      ],
+      "couponPaise": 0,
+      "note": "One-paise rounding probe: effective 10001 paise splits 60/25/15 as 6000.60 / 2500.25 / 1500.15 — the single residual paise goes to the card leg (largest fraction 0.60), giving 6001 / 2500 / 1500. Any engine that is off by even 1 paise on any leg fails this order.",
+      "payments": [
+        {
+          "instrument": "card",
+          "amountPaise": 60000
+        },
+        {
+          "instrument": "wallet",
+          "amountPaise": 25000
+        },
+        {
+          "instrument": "voucher",
+          "amountPaise": 15000
+        }
+      ],
+      "allocationMatrix": {
+        "rows": [
+          {
+            "itemId": "TO-10-I1",
+            "effectivePricePaise": 10001,
+            "legs": {
+              "card": 6001,
+              "wallet": 2500,
+              "voucher": 1500
+            },
+            "rowTotalPaise": 10001
+          },
+          {
+            "itemId": "TO-10-I2",
+            "effectivePricePaise": 89999,
+            "legs": {
+              "card": 53999,
+              "wallet": 22500,
+              "voucher": 13500
+            },
+            "rowTotalPaise": 89999
+          }
+        ],
+        "columnTotalsPaise": {
+          "card": 60000,
+          "wallet": 25000,
+          "voucher": 15000
+        },
+        "grandTotalPaise": 100000
+      },
+      "returnItemIds": [
+        "TO-10-I1"
+      ],
+      "expectedRefund": {
+        "mode": "prorata",
+        "legs": [
+          {
+            "instrument": "card",
+            "amountPaise": 6001
+          },
+          {
+            "instrument": "wallet",
+            "amountPaise": 2500
+          },
+          {
+            "instrument": "voucher",
+            "amountPaise": 1500
+          }
+        ],
+        "totalPaise": 10001
+      }
+    }
+  ]
+}
