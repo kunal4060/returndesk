@@ -21,6 +21,41 @@ describe('reconciler — waiting vs stuck', () => {
     expect(r.breakClass).toBeNull();
   });
 
+  it('in_agreement: settled vocabulary differs per source (credited vs provider "processed")', () => {
+    // The hero R-1 wallet leg: platform/seller say "credited", the
+    // provider's success-terminal is "processed" — one settled fact
+    // in three vocabularies (report 02, §5.1), so this IS agreement.
+    const r = classifyLeg({
+      instrument: 'wallet',
+      ageHours: 3,
+      platformState: 'credited',
+      providerState: 'processed',
+      sellerState: 'credited',
+      platformAmountPaise: 22222,
+      providerAmountPaise: 22222,
+      legPresentAtProvider: true,
+    });
+    expect(r.verdict).toBe('in_agreement');
+    expect(r.breakClass).toBeNull();
+  });
+
+  it('waiting: all sources agree "pending" inside budget — in flight is not agreement yet', () => {
+    // The hero R-1 voucher leg pattern: unanimous "pending" inside
+    // the latency budget is waiting; in_agreement is reserved for
+    // settled (terminal) agreement, matching the seeded labels.
+    const r = classifyLeg({
+      instrument: 'card',
+      ageHours: 10,
+      platformState: 'pending',
+      providerState: 'pending',
+      sellerState: 'pending',
+      platformAmountPaise: 10000,
+      providerAmountPaise: 10000,
+      legPresentAtProvider: true,
+    });
+    expect(r.verdict).toBe('waiting');
+  });
+
   it('waiting: card leg at 48h, provider still pending (budget 168h)', () => {
     const r = classifyLeg({
       instrument: 'card',

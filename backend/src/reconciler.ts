@@ -67,27 +67,43 @@ export interface ClassifyLegResult {
 const TERMINAL_FAILURE_STATES: ReadonlySet<string> = new Set(['failed', 'reversed']);
 const TERMINAL_STATES: ReadonlySet<string> = new Set(['credited', 'processed', 'failed', 'reversed', 'succeeded']);
 
+/**
+ * Canonical state for cross-source comparison. The three sources
+ * stamp DIFFERENT events for the same fact (report 02, §5.1): the
+ * provider's success-terminal is "processed", while the platform
+ * ledger and the seller record say "credited" once the money has
+ * landed. Those are one settled fact in three vocabularies, so
+ * agreement is judged on canonical states, not raw strings.
+ */
+function canonState(state: string): string {
+  if (state === 'processed' || state === 'succeeded') return 'credited';
+  return state;
+}
+
 export function classifyLeg(input: ClassifyLegInput): ClassifyLegResult {
   const budget = LATENCY_BUDGET_HOURS[input.instrument];
   const { ageHours, platformState, providerState, sellerState } = input;
 
   const statesAgree =
     providerState !== null &&
-    providerState === platformState &&
-    (sellerState === null || sellerState === platformState);
+    canonState(providerState) === canonState(platformState) &&
+    (sellerState === null || canonState(sellerState) === canonState(platformState));
   const amountDelta =
     input.providerAmountPaise === null ? null : Math.abs(input.providerAmountPaise - input.platformAmountPaise);
   const amountsEqual = amountDelta === null || amountDelta === 0;
 
-  // Rule 1 — agreement: all sources tell the same story, amounts
-  // match, and either the state is terminal or we are still inside
-  // the latency budget (a leg everyone agrees is "pending" at hour 2
-  // of a 168h card budget is simply in flight, in agreement).
-  if (statesAgree && amountsEqual && (TERMINAL_STATES.has(platformState) || ageHours <= budget)) {
+  // Rule 1 — agreement: all sources tell the same story (in canonical
+  // vocabulary), amounts match, and the agreed state is TERMINAL —
+  // the leg has settled (or terminally failed) the same way
+  // everywhere. Agreement on a NON-terminal state is not agreement
+  // yet: the leg is still in flight, which is "waiting" (Rule 5.5) —
+  // the same label the seeded dataset uses for agreeing in-flight
+  // legs (e.g. the hero voucher leg, all sources "pending").
+  if (statesAgree && amountsEqual && TERMINAL_STATES.has(platformState)) {
     return {
       verdict: 'in_agreement',
       breakClass: null,
-      reason: `Platform, provider and seller agree on state "${platformState}" and the amount matches exactly.`,
+      reason: `Platform, provider and seller agree on the same terminal state (platform "${platformState}") and the amount matches exactly.`,
     };
   }
 
@@ -152,6 +168,18 @@ export function classifyLeg(input: ClassifyLegInput): ClassifyLegResult {
       verdict: 'stuck',
       breakClass: 'timing',
       reason: `Leg is ${ageHours}h old in state "${platformState}", beyond the ${input.instrument} latency budget of ${budget}h, with no terminal outcome — escalate.`,
+    };
+  }
+
+  // Rule 5.5 — in-flight agreement: every source agrees the leg is
+  // still moving (canonical states equal, non-terminal) and we are
+  // inside the budget (Rule 5 already handled over-budget). Nothing
+  // is broken; the leg is simply not settled yet — waiting.
+  if (statesAgree && amountsEqual) {
+    return {
+      verdict: 'waiting',
+      breakClass: 'timing',
+      reason: `All three sources agree the leg is still in flight ("${platformState}") at ${ageHours}h, inside the ${input.instrument} latency budget of ${budget}h — waiting, not stuck. It counts as in agreement only once it settles.`,
     };
   }
 

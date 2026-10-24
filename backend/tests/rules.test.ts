@@ -131,6 +131,26 @@ describe('assessFriction — fairness for the legit heavy returner', () => {
     expect(reduced.level).toBe(0);
   });
 
+  it('sizing-dominant graded share caps at level 2 (seeded HR-5 family account); low share does not (HR-2)', () => {
+    const hr5 = assessFriction({
+      returnsLast90Days: 15,
+      accountAgeDays: 1200,
+      allSizingRelated: false,
+      sizingShare: 0.73,
+      priorAppealsUpheld: 0,
+    });
+    expect(hr5.level).toBeLessThanOrEqual(2);
+    expect(hr5.signals.join('\n')).toContain('73%');
+    const hr2 = assessFriction({
+      returnsLast90Days: 28,
+      accountAgeDays: 45,
+      allSizingRelated: false,
+      sizingShare: 0.18,
+      priorAppealsUpheld: 0,
+    });
+    expect(hr2.level).toBe(3);
+  });
+
   it('publishes friction actions per level', () => {
     expect(FRICTION_ACTIONS[1].join(' ')).toContain('Extra photos');
     expect(FRICTION_ACTIONS[2].join(' ')).toContain('Inspection before refund');

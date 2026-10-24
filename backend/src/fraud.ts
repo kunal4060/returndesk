@@ -28,6 +28,15 @@ export interface FrictionInput {
   accountAgeDays: number;
   /** True when every recent return is a size/fit return. */
   allSizingRelated: boolean;
+  /**
+   * Optional graded form of the sizing signal: the share (0..1) of
+   * recent returns that are sizing/fit related. A sizing-DOMINANT
+   * pattern (share ≥ 0.7) earns the same fairness cap as an
+   * all-sizing pattern — bracketing does not stop being legitimate
+   * because 3 returns in 10 were for other reasons (seeded profile
+   * HR-5: 15 returns, 73% sizing, family account — capped at L2).
+   */
+  sizingShare?: number;
   /** Appeals by this customer that a human previously upheld. */
   priorAppealsUpheld: number;
 }
@@ -41,6 +50,9 @@ export interface FrictionAssessment {
 
 export function assessFriction(input: FrictionInput): FrictionAssessment {
   const { returnsLast90Days, accountAgeDays, allSizingRelated, priorAppealsUpheld } = input;
+  const sizingShare = input.sizingShare;
+  const sizingDominant =
+    allSizingRelated || (sizingShare !== undefined && sizingShare >= 0.7);
   const signals: string[] = [];
 
   // Volume ladder.
@@ -48,7 +60,7 @@ export function assessFriction(input: FrictionInput): FrictionAssessment {
   if (returnsLast90Days <= 3) level = 0;
   else if (returnsLast90Days <= 7) level = 1;
   else if (returnsLast90Days <= 11) level = 2;
-  else level = allSizingRelated ? 2 : 3;
+  else level = sizingDominant ? 2 : 3;
   if (returnsLast90Days > 3) {
     signals.push(`Return volume: ${returnsLast90Days} returns in the last 90 days.`);
   }
@@ -58,11 +70,15 @@ export function assessFriction(input: FrictionInput): FrictionAssessment {
     signals.push(
       'All recent returns are sizing/fit related — bracketing sizes is a known legitimate pattern, so sizing alone caps friction at Level 2 and can never trigger manual review.',
     );
+  } else if (!allSizingRelated && sizingDominant && returnsLast90Days > 3) {
+    signals.push(
+      `${Math.round((sizingShare ?? 0) * 100)}% of recent returns are sizing/fit related — a sizing-dominant bracketing pattern, so friction is capped at Level 2 and cannot trigger manual review on volume alone.`,
+    );
   }
 
   // Non-sizing anomaly: a very new account returning at high volume
   // for non-sizing reasons is the pattern Level 3 exists for.
-  if (!allSizingRelated && accountAgeDays < 30 && returnsLast90Days >= 8) {
+  if (!sizingDominant && accountAgeDays < 30 && returnsLast90Days >= 8) {
     level = 3;
     signals.push(
       `Account is ${accountAgeDays} days old with ${returnsLast90Days} non-sizing returns in 90 days — a non-sizing anomaly that requires human review.`,
@@ -80,8 +96,8 @@ export function assessFriction(input: FrictionInput): FrictionAssessment {
   }
 
   const fairnessNote =
-    level <= 2 && allSizingRelated && returnsLast90Days >= 8
-      ? `Proportionality: this customer is a heavy returner (${returnsLast90Days} returns in 90 days), but every return is sizing-related. Friction is therefore capped at Level 2 — extra verification (photos, inspection before refund) rather than manual review or any accusation. Level 3 is reserved for non-sizing anomalies, and any friction can be appealed to a human.`
+    level <= 2 && sizingDominant && returnsLast90Days >= 8
+      ? `Proportionality: this customer is a heavy returner (${returnsLast90Days} returns in 90 days), but the pattern is sizing-dominant. Friction is therefore capped at Level 2 — extra verification (photos, inspection before refund) rather than manual review or any accusation. Level 3 is reserved for non-sizing anomalies, and any friction can be appealed to a human.`
       : 'Proportionality: friction only ever adds verification steps, never an accusation or a silent block. Every signal above is shown to the customer with its reason, and any decision can be appealed to a human reviewer.';
 
   return { level, signals, fairnessNote, appealAvailable: true };
